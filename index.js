@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var queryTypeError = document.getElementById('query-type-error');
         var queryType1Input = document.getElementById('grid-query-type-1');
         var queryType1InputError = document.getElementById('query-type-1-error');
+        var queryType2Input = document.getElementById('grid-query-type-2');
         var messageInput = document.getElementById('message');
         var messageError = document.getElementById('message-error');
         var consent = document.getElementById('consent');
@@ -24,25 +25,32 @@ document.addEventListener('DOMContentLoaded', function () {
         // first name validation
         if (!firstNameInput.value.trim()) {
             firstNameError.classList.remove('hidden');
+            firstNameInput.classList.add('border-error');
             isValid = false;
         } else {
             firstNameError.classList.add('hidden');
+            firstNameInput.classList.remove('border-error');
         }
 
-        // last name validation
+        // last Name validation
         if (!lastNameInput.value.trim()) {
             lastNameError.classList.remove('hidden');
+            lastNameInput.classList.add('border-error');
             isValid = false;
         } else {
             lastNameError.classList.add('hidden');
+            lastNameInput.classList.remove('border-error');
         }
 
         // email
-        if (!emailInput.value.trim()) {
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailInput.value.trim() || !emailPattern.test(emailInput.value.trim())) {
             emailError.classList.remove('hidden');
+            emailInput.classList.add('border-error');
             isValid = false;
         } else {
             emailError.classList.add('hidden');
+            emailInput.classList.remove('border-error');
         }
 
         // query type validation (shared error message)
@@ -54,26 +62,28 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // validate text input based on selected radio button
-        if (queryType1Radio.checked && !queryType1Input.value.trim()) {
+        if (queryType1Radio.checked && !queryType1Input.textContent.trim()) {
             queryType1InputError.classList.remove('hidden');
             isValid = false;
-        } else if (queryType1Radio.checked) {
+        } else {
             queryType1InputError.classList.add('hidden');
         }
 
-        if (queryType2Radio.checked && !queryType2Input.value.trim()) {
+        if (queryType2Radio.checked && !queryType2Input.textContent.trim()) {
             queryType1InputError.classList.remove('hidden');
             isValid = false;
-        } else if (queryType2Radio.checked) {
+        } else {
             queryType1InputError.classList.add('hidden');
         }
 
         // message validation
         if (!messageInput.value.trim()) {
             messageError.classList.remove('hidden');
+            messageInput.classList.add('border-error');
             isValid = false;
         } else {
             messageError.classList.add('hidden');
+            messageInput.classList.remove('border-error');
         }
 
         // consent
@@ -84,19 +94,47 @@ document.addEventListener('DOMContentLoaded', function () {
             consentError.classList.add('hidden');
         }
 
-
-        // prevent default form submission
-        event.preventDefault();
-
-        if (isValid) {
-            // If all validations pass, submit the form
-            alert('Thanks for completing the form. We`ll be in touch soon!');
-        }
+        return isValid;
     }
 
-    // event listener for form submission
-    var form = document.querySelector('form');
+    // form submission
+    var form = document.getElementById('contact-form');
+
     if (form) {
-        form.addEventListener('submit', validateForm);
+        form.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            if (validateForm()) {
+                //  show modal popup if all validations pass
+                var modalBackdrop = document.querySelector('.bg-gray-500');
+                var modalPanel = document.querySelector('.relative.transform');
+
+                // display modal
+                modalBackdrop.classList.remove('opacity-0', 'hidden');
+                modalBackdrop.classList.add('opacity-100');
+                modalPanel.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+                modalPanel.classList.add('opacity-100', 'translate-y-0', 'sm:scale-100');
+
+                // clear form after submission
+                form.reset();
+            }
+        });
     }
+
+    // change background color for radio buttons
+    var radios = document.querySelectorAll('input[type="radio"][name="query-type"]');
+    radios.forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            var radioContainers = document.querySelectorAll('.radio-container, .selection');
+            radioContainers.forEach(function (container) {
+                container.classList.remove('bg-lightGreen');
+            });
+
+            var selectedContainer = radio.closest('.radio-container, .selection');
+            if (selectedContainer) {
+                selectedContainer.classList.add('bg-lightGreen');
+            }
+        });
+    });
+
 });
